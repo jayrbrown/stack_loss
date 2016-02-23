@@ -1,0 +1,58 @@
+---
+title: "Stack Loss"
+author: "Jay Brown"
+date: "Wednesday, February 10, 2016"
+output: slidy_presentation
+---
+
+## Plant Efficiency Simulator
+
+The Plant Efficiency Simulator is a Shiny application which allows the user to adjust key inputs via sliders and see the predicted efficiency value for an operating nitric acid plant. This is ideally suited to a commercial food grower with onsite fertilizer production where the nitric acid plant is part of the operation.
+
+Nitric acid is a key chemical compound used in fertilizers. It is manufactured by preheating air and mixing it with ammonia gas then mixing it with water where it absorbs the nitrogen in the water to form nitric acid. The nitric acid is then used immediately in production of ammonium nitrate fertilizer.
+
+The selected input for each of the three variables is shown as a red line in their respective density plots to illustrate where the selected value falls in the original data distribution for comparison.
+
+
+## Stack Loss
+
+Stack Loss refers to a measure that is 10 times the percentage of the ingoing ammonia to the plant that escapes from the absorption column unabsorbed. 
+
+Stack loss represents an (inverse) measure of the overall efficiency of the plant. 
+
+Lower values are better for efficiency and environmental concerns because it means less ammonia is escaping the manufacturing process.
+
+- Air Flow represents the rate of operation of the plant. 
+- Water Temp is the temperature of cooling water circulated through coils in the absorption tower. 
+- Acid Conc. is the concentration of the acid circulating, minus 50, times 10. For example, 89 corresponds to 58.9 per cent acid. 
+
+## Model
+
+Data are from the stats package sample dataset "stackloss" representing 21 days of operation of a plant for the oxidation of ammonia (NH3) to nitric acid (HNO3). A regression model was fitted using the data and as the user changes the inputs, the stack loss value is predicted using this model. 
+
+```{r loaddata, echo=FALSE}
+data(stackloss)
+fit <- lm(stack.loss ~ ., data=stackloss)
+summary(fit)
+```
+
+## Result
+
+This plot of all values illustrates the relationships of predictors to stack.loss. Note Air.Flow has close correlation supporting the significant p-value seen in the model summary. The behaviour of the predictions reflects this and the change to Air.Flow has the most impact on the predicted stack loss.
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.align='center'}
+library(ggplot2); 
+
+df <- stackloss
+df$day <- as.numeric(row.names(df))
+p <- ggplot(df, aes(x=day, y=value, colour=variable)) +
+    geom_line(size=1, aes(y=Air.Flow, col="Air.Flow")) +
+    geom_line(size=1, aes(y=Water.Temp, col="Water.Temp")) +
+    geom_line(size=1, aes(y=Acid.Conc., col="Acid.Conc.")) +
+    geom_line(size=2, aes(y=stack.loss, col="stack.loss")) +
+    labs(title="Plant Efficiency") +
+    scale_colour_manual("", values=c("Air.Flow"="red", "Water.Temp"="orange", "Acid.Conc."="green", "stack.loss"="black"))
+p
+```
+
+Using the interactive Plant Efficiency Simulator, the plant operator can easily experiment with new values to drive changes to plant operation.
